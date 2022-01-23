@@ -15,4 +15,4 @@ output:
   postcards::trestles
 ---
  
-I am a third year graduate student in the Integrated Anthropological Sciences wing of the Anthropology department and University of California, Santa Barbara. My research explores the role of men, social learning and transmission, and gender norms in perpetuating harmful gender ideologies and limiting efforts towards gender equality and women's empowerment. 
+I am a third year graduate student in the Integrated Anthropological Sciences wing of the Anthropology department and University of California, Santa Barbara. My research explores the role of men, social learning and transmission, and gender norms in perpetuating harmful gender ideologies and limiting efforts towards gender equality and women's empowerment.!! 
