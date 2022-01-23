@@ -1,0 +1,18 @@
+---
+title: "Joseph Kilgallen"
+image: "joseph.jpeg"
+site: distill::distill_website
+links:
+  - label: LinkedIn
+    url: "https://www.linkedin.com/in/joseph-kilgallen-59442069/"
+  - label: Twitter
+    url: "https://twitter.com/JosephKilgallen"
+  - label: GitHub
+    url: "https://github.com/jakilgallen"
+  - label: Email
+    url: "jkilgallen@ucsb.edu"
+output:
+  postcards::trestles
+---
+ 
+I am a third year graduate student in the Integrated Anthropological Sciences wing of the Anthropology department and University of California, Santa Barbara. My research explores the role of men, social learning and transmission, and gender norms in perpetuating harmful gender ideologies and limiting efforts towards gender equality and women's empowerment. 

@@ -1,0 +1,27 @@
+{
+  "articles": [
+    {
+      "path": "about.html",
+      "title": "About this site",
+      "description": "Some additional details about the website",
+      "author": [],
+      "contents": "\n\n\n\n",
+      "last_modified": "2022-01-23T13:34:54-08:00"
+    },
+    {
+      "path": "blog.html",
+      "title": "Blog",
+      "author": [],
+      "contents": "\n\n\n\n",
+      "last_modified": "2022-01-23T13:34:54-08:00"
+    },
+    {
+      "path": "index.html",
+      "title": "Joseph Kilgallen",
+      "author": [],
+      "contents": "\n\n          \n      \n      Joseph Kilgallen\n      \n      \n      Home\n      About\n      Blog\n      ☰\n      \n      \n      \n        \n          \n            \n              \n            \n              Joseph Kilgallen\n            \n            \n              \n                \n                    \n                      \n                        LinkedIn\n                      \n                    \n                  \n                                    \n                    \n                      \n                        Twitter\n                      \n                    \n                  \n                                    \n                    \n                      \n                        GitHub\n                      \n                    \n                  \n                                    \n                    \n                      \n                        Email\n                      \n                    \n                  \n                                  \n            \n          \n        \n        \n        \n          \n            I am a third year graduate student in the Integrated Anthropological Sciences wing of the Anthropology department and University of California, Santa Barbara. My research explores the role of men, social learning and transmission, and gender norms in perpetuating harmful gender ideologies and limiting efforts towards gender equality and women’s empowerment.\n          \n        \n      \n    \n\n    \n      \n        \n          \n            \n              \n            \n              Joseph Kilgallen\n            \n            \n              \n                \n                                    \n                    \n                      LinkedIn\n                    \n                  \n                                    \n                    \n                      Twitter\n                    \n                  \n                                    \n                    \n                      GitHub\n                    \n                  \n                                    \n                    \n                      Email\n                    \n                  \n                                  \n              \n            \n            \n              I am a third year graduate student in the Integrated Anthropological Sciences wing of the Anthropology department and University of California, Santa Barbara. My research explores the role of men, social learning and transmission, and gender norms in perpetuating harmful gender ideologies and limiting efforts towards gender equality and women’s empowerment.\n            \n        \n      \n    \n\n    \n    \n    ",
+      "last_modified": "2022-01-23T13:40:28-08:00"
+    }
+  ],
+  "collections": ["posts/posts.json"]
+}
