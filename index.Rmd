@@ -11,10 +11,29 @@ links:
     url: "https://github.com/jakilgallen"
   - label: Email
     url: "jkilgallen@ucsb.edu"
+  - label: Evolutionary Anthropology Lab
+    url: "https://davidwlawson.mystrikingly.com/"
 output:
   postcards::trestles
 ---
- 
-I am a third year graduate student in the Integrated Anthropological Sciences wing of the Anthropology department and University of California, Santa Barbara. My research explores the role of men, social learning, and gender norms in perpetuating harmful gender ideologies and limiting efforts towards gender equality and women's empowerment!
+## Bio
+
+Joseph Kilgallen is a a third year graduate student in the Integrated Anthropological Sciences wing of the Anthropology department and University of California, Santa Barbara. My research explores the role of men, social learning, and gender norms in perpetuating harmful gender ideologies and limiting efforts towards gender equality and women's empowerment. 
+
+## Education
+
+**University of California, Santa Barbara** | Santa Barbara, CA
+
+Ph.D. in Biological Anthropology | September 2021 - Ongoing
+
+**University of California, Santa Barbara** | Santa Barbara, CA
+
+M.A. in Biological Anthropology | September 2019 - August 2021
+
+## Publications
+
+Kilgallen JA, Schaffnit SB, Kumogola Y, Galura A, Urassa M. Lawson DW, (in press). Positive correlation between women’s status and intimate partner violence suggests violence backlash in Mwanza, Tanzania. Journal of Interpersonal Violence.
+
+Lawson DW, Schaffnit SB, Kilgallen JA, Kumogola Y, Galura A & Urassa M. (2021). He for She? Variation and exaggeration in men’s support for women’s empowerment in northern Tanzania. Evolutionary Human Sciences. 3: E27.
 
 

@@ -1,10 +1,11 @@
 ---
-title: "About this site"
+title: "About me"
 description: |
-  Some additional details about the website
+  I am a human behavioral ecologist, particularly interested in the evolutionary roots of patriarchy.
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
+dfjdfdfjd
