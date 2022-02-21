@@ -10,6 +10,8 @@ navbar:
       href: index.html
     - text: "My Research"
       href: about.html
+    - text: "CV"
+      href: cv.html
     - text: "Analysis Portfolio"
       href: blog.html
 output: distill::distill_article
