@@ -14,11 +14,10 @@ links:
   - label: Evolutionary Anthropology Lab
     url: "https://davidwlawson.mystrikingly.com/"
 output:
-  postcards::trestles
+  postcards::jolla_blue
 ---
-## Bio
 
-Joseph Kilgallen is a a third year graduate student in the Integrated Anthropological Sciences wing of the Anthropology department and University of California, Santa Barbara. My research explores the role of men, social learning, and gender norms in perpetuating harmful gender ideologies and limiting efforts towards gender equality and women's empowerment. 
+I am a Phd student in the Integrated Anthropological Sciences wing of the Anthropology department at the University of California, Santa Barbara. My research explores the role of men, social learning, and gender norms in perpetuating harmful gender ideologies and limiting efforts towards gender equality and women's empowerment. 
 
 
 

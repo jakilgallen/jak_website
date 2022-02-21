@@ -1,22 +1,154 @@
 ---
-title: "welcome"
+title: "Analysis Example"
 description: |
-  A short description of the post.
+  Please Enjoy this amazing example of my analytical prowess.
 author:
   - name: 'Joseph Kilgallen '
 date: 2022-01-23
 output:
   distill::distill_article:
     self_contained: false
+    code_folding: hide
 ---
 
+# Report Overview
+This report explores the relationship between O2 saturation of seawater off California’s coast and several physical and chemical variables using multiple linear regression. Within the report we formulate models to predict 02 saturation and then use AIC and 10-fold cross validation to determine the best model for the existing data. All data comes from the California Current system, a hydrographic time-series data set ongoing since 1949. 
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+**Data citation:** CalCOFI data are available for use without restriction. Data downloaded from https://calcofi.org/ccdata.html.  Accessed 1/10/2022.
+
+#### Setup
+```{r setup, include=TRUE, message=FALSE, warning= FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(here)
+library(tidyverse)
+library(AICcmodavg)
+library(equatiomatic)
+library(broom)
+library(jtools)
+library(caret)
+library(survival)
+library(kimisc)
+library(kableExtra)
 ```
 
-Distill is a publication format for scientific and technical writing, native to the web.
+```{r}
+seawater <- read_csv(here("data", "calcofi_seawater_samples.csv"),
+                     show_col_types = FALSE)
+```
 
-Learn more about using Distill at <https://rstudio.github.io/distill>.
+## Model Creation 
 
+Creating two models one modeling oxygen saturation as a function of water temperature, salinity, and phosphate concentration and the other modeling oxygen saturation as a function of water temp, salinity, phosphate concentration, and depth.
+
+```{r}
+## Going to create the two models
+## Model 1--- Oxygen saturation as a function of water temperature, salinity, and phosphate concentration
+f1 <- o2sat~ t_deg_c + salinity + po4u_m
+mdl1 <- lm(formula = f1, data = seawater)
+# Coefficients:
+#             Estimate Std. Error t value Pr(>|t|)    
+# (Intercept) 195.7345    93.9380   2.084   0.0398 *  
+# t_deg_c      -0.4700     0.3902  -1.205   0.2313    
+# salinity     -2.1350     2.9344  -0.728   0.4686    
+# po4u_m      -38.4778     2.5207 -15.265   <2e-16 ***
+# Multiple R-squared:  0.9554,	Adjusted R-squared:  0.954 
+# F-statistic: 685.5 on 3 and 96 DF,  p-value: < 2.2e-16
+
+## Model 2--- Oxygen saturation as a function of water temp, salinity, phosphate concentration, and depth.
+f2 <- o2sat~ t_deg_c + salinity + po4u_m + depth_m
+mdl2 <- lm(formula = f2, data = seawater)
+# Coefficients:
+#              Estimate Std. Error t value Pr(>|t|)    
+# (Intercept) 144.06686   95.36730   1.511   0.1342    
+# t_deg_c      -0.74981    0.40494  -1.852   0.0672 .  
+# salinity     -0.43945    2.98897  -0.147   0.8834    
+# po4u_m      -37.71159    2.50113 -15.078   <2e-16 ***
+# depth_m      -0.03196    0.01497  -2.135   0.0354 *  
+# Multiple R-squared:  0.9574,	Adjusted R-squared:  0.9557 
+# F-statistic: 534.3 on 4 and 95 DF,  p-value: < 2.2e-16
+```
+
+## Model Selection pt.1 AIC
+
+Below we compare the two models using the Aikeike Information Criterion (AIC). 
+
+```{r}
+## Now going to compare the two models using the AICcmodavg package
+model_list <- nlist(mdl1, mdl2)
+## According to the AIC Model 2 is currently the best fit
+
+
+# Add a column to the table with variable names
+# modelsummary(list(mdl1, mdl2), fmt = 2) %>% 
+#   kabl
+aic_table <- AICcmodavg::aictab(model_list, modnames = c("Model 1", "Model 2"),
+       second.ord = TRUE,
+       sort = TRUE,
+       )
+aic_table %>% 
+  kbl(caption = "Model Ranking based on AIC") %>% 
+  kable_classic(full_width = F, html_font = "Cambria")
+```
+
+**AIC Summary Results:** 
+Based on resultant AIC scores, it appears that model 2 may be the better fit for predicting oxygen saturation from our data. Comparing AIC scores for model 1 (AIC = 619) and model 2 (AIC = 616), we find that model 2 has an overall lower AIC score indicating that it provides a better balance of explanatory power and simplicity compared to model 1. Both models have similar r-squared values around 0.95, thus given AIC scores model 2 appears to be the best fit. 
+
+
+## Model Selection pt.2 10-fold cross-validation
+
+Below we use an alternative methodology to determine model selection, utilizing a 10-fold cross-validation method.
+
+
+```{r}
+set.seed(123)
+
+tr_ctrl <- trainControl(method = 'cv', number = 10) # cv tells cross-validation, number = # of folds
+tr_ctrl_repeated<- trainControl(method = 'repeatedcv', 
+                                number = 10, repeats =10) # now this tells it to do repeated tests 
+
+## train the model, the below function tells us using formula f1 and the specified data, build a lm 
+ ## now running with repeated for model1
+ model1<- train(f1, data = seawater,
+                method = 'lm',
+                trControl = tr_ctrl_repeated)
+ # RMSE      Rsquared   MAE     
+ #  4.891453  0.9591882  3.503781
+
+  ## now running with repeated for model2
+ model2<- train(f2, data = seawater,
+                method = 'lm', 
+                trControl = tr_ctrl_repeated)
+ # RMSE      Rsquared   MAE     
+ #  4.808869  0.9614641  3.492599
+
+ ## Making a table of results
+ Model <- c("Model 1", "Model 2")
+ RMSE <- c(4.891453, 4.808869)
+ R_Squared <- c(0.9591882, 0.9614641)
+ MAE <- c(3.503781, 3.492599)
+ k_fold_data <- data_frame(Model, RMSE, R_Squared)
+ 
+ k_fold_data %>% 
+   kbl(caption = "Model Ranking based on 10-Fold Cross Validation") %>% 
+  kable_classic(full_width = F, html_font = "Cambria")
+ 
+ 
+```
+**10-fold Cross-Validation Summary Results:** 
+Based on results of our 10-fold cross-validation tests, we find that model 2 appears to be best fit; reconfirming previous findings from the AIC. Comparing RMSE's for model 1 and 2 (see table 2) we find that while both models have similar R-squared values, model 2 has a lower relative RMSE, indicating it is better fit to our data.
+
+
+
+
+# Final Parametized Model predicting Oxygen Saturation 
+```{r}
+final_mdl <- lm(f2, data = seawater)
+```
+**Conclusion:** Taking into account results of both the AIC and 10-fold cross validation, we determine that model 2 is the best fit model for the data. Model 2 had the relatively lowest AIC score as well as RMSE, indicating that it is superior in it's simplicity, explanatory power, and data fit in comparison to model 1.
+
+ Our final model:
+ `r equatiomatic::extract_eq(final_mdl, wrap= TRUE)`
+
+ And with parameters:
+ `r equatiomatic::extract_eq(final_mdl, wrap = TRUE, use_coefs = TRUE)`
 
