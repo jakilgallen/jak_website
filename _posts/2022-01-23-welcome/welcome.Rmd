@@ -1,7 +1,7 @@
 ---
-title: "Analysis Example"
+title: "Model Selection: Analysis Example"
 description: |
-  Please Enjoy this amazing example of my analytical prowess.
+  See here for an example of a report I have done using AIC and K-fold cross-validation for model selection.
 author:
   - name: 'Joseph Kilgallen '
 date: 2022-01-23
@@ -12,6 +12,7 @@ output:
 ---
 
 # Report Overview
+
 This report explores the relationship between O2 saturation of seawater off California’s coast and several physical and chemical variables using multiple linear regression. Within the report we formulate models to predict 02 saturation and then use AIC and 10-fold cross validation to determine the best model for the existing data. All data comes from the California Current system, a hydrographic time-series data set ongoing since 1949. 
 
 **Data citation:** CalCOFI data are available for use without restriction. Data downloaded from https://calcofi.org/ccdata.html.  Accessed 1/10/2022.

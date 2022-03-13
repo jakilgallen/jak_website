@@ -1,0 +1,140 @@
+---
+title: "Vizualizing California Oil Spills"
+description: |
+  A short description of the post.
+author:
+  - name: 'Joseph Kilgallen '
+    url: {}
+date: 2022-03-13
+output:
+  distill::distill_article:
+    self_contained: false
+    theme: darkly
+    highlight: tango
+    code_folding: hide
+---
+
+
+```{r setup, include= TRUE, warning = FALSE, message= FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(here)
+library(broom)
+library(sf)
+library(tmap)
+library(gstat)
+library(stars)
+```
+
+## Overview
+**Report Summary** 
+
+In this report I visualize and explore Oil spill events across California recorded throughout the year of 2008. I first present an exploratory interactive map of oil spill events by land area across CA and then present a depiction of oil spill events by county so that viewers can easily assess the relative frequency of oil spills by CA county. In this database, an oil spill "incident" is defined as  "a discharge or threatened discharge of petroleum or other deleterious material into the waters of the state." The report concludes with key takeaways to consider based on the two visuzaliations. All data comes from the California Office of Spill Prevention and Response's (OSPR) Incident Tracking Database System project which quantifies statistical data on oil spills in CA. 
+
+**Data Citation** 
+
+Oil spill incident tracking [DS394]. California State Geoportal. (n.d.). Retrieved March 13, 2022, from https://gis.data.ca.gov/datasets/7464e3d6f4924b50ad06e5a553d71086_0/about 
+
+### Exploratory Interactive Map of Oil Spill Events in California
+
+Here we make an exploratory interactive map in tmap showing the location of oil spill events included in the data. This map allows viewers to zoom in, explore different areas, and investigate trends themselves.
+
+```{r}
+## reading in the data First, let's read in the California county shapefile:
+ca_counties_sf <- read_sf(here("data", "ca_counties", "CA_Counties_TIGER2016.shp"))
+
+## subset and clean up
+ca_subset_sf <- ca_counties_sf %>% 
+  janitor::clean_names() %>%
+  select(county_name = name, land_area = aland)
+
+#head(ca_subset_sf) 
+
+## checking CRS
+#ca_subset_sf %>% st_crs()
+## epsg 3857
+
+## looking at it
+plot1 <- ggplot(data = ca_subset_sf) +
+  geom_sf(aes(fill = land_area), color = "white", size = 0.1) +
+  theme_void() +
+  scale_fill_gradientn(colors = c("cyan","blue","purple"))
+
+## reading in the Oil Spill Incident data
+oil_sf <- read_sf(here("data","ds394","ds394.shp")) %>%
+  janitor::clean_names()
+
+# Check the CRS:
+#oil_sf %>% st_crs()
+#epsg 3310
+
+# Notice that this CRS is different from the California counties CRS, so we'll want to update it to match. Use `st_transform()` to update the CRS:
+### if you don't know the EPSG code:
+oil_sf_3857 <- st_transform(oil_sf, st_crs(ca_counties_sf))
+
+# Then check it: 
+#oil_sf_3857  %>% st_crs()
+
+#Cool, now they have the same CRS. 
+
+## plotting the two together
+plot2 <- ggplot() +
+  geom_sf(data = ca_subset_sf) +
+  geom_sf(data = oil_sf_3857, size = 1, color = "red")
+
+### Now that all set up is done lets make the interactive map
+# Set the viewing mode to "interactive":
+tmap_mode(mode = "view")
+
+# Then make a map (with the polygon fill color updated by variable 'land_area', updating the color palette to "BuGn"), then add another shape layer for the oil spill records (added as dots):
+tm_shape(ca_subset_sf) +
+  tm_fill("land_area", palette = "Blues") +
+  tm_shape(oil_sf) +
+  tm_dots() 
+
+```
+
+### Finalized static choropleth map 
+
+Below we present a Choropleth map depicting the count of inland oill spill events by county from recorded oils spills in 2008.
+
+```{r}
+#To find the count of oil spills observed locations in this dataset *by county*. need to use`st_join()` to combine the two spatial datasets
+ca_oil_sf <- ca_subset_sf %>% 
+  st_join(oil_sf_3857)
+
+#head(oil_sf_3857)
+
+#head(ca_oil_sf)
+## Great that worked!
+
+# Now want to find the counts by record in the dataset by county.  
+## We can't just count the rows (e.g., using count()) because some rows are counties with no records (and sesbania information is all NAs)
+
+oil_counts_sf <- ca_oil_sf %>% 
+  group_by(county_name) %>%
+  summarize(n_records = sum(!is.na(oesnumber)))
+
+#head(oil_counts_sf)
+
+
+### Then we can plot a choropleth using the number of records for oil spills as the fill color 
+ggplot(data = oil_counts_sf) +
+  geom_sf(aes(fill = n_records), color = "white", size = 0.1) +
+  scale_fill_gradientn(colors = c("lightgray","orange","red")) +
+  theme_minimal() +
+  labs(fill = "Number of Oil Spills recorded", title = "California Oil Spills By County in 2008")
+```
+
+### Conclusions:
+
+Following visualizations of the oils spills across Californian counties, we report the following key takeaways:
+
+- Highest concentration of oil spills occurs in counties in Southern California, particularly Los Angeles county. Future research should look into why oil spills have been so common in this county and how context specific solutions can be found to mitigate future spills.
+
+- Oil spills appear to be largely concentrated along the coastline, this is highly relevant to California fisheries as well as tourism, the state government should work to increase accountability around these locations and look into supporting conservation efforts to ensure the biodiversity in these areas is maintained. 
+
+- Future research should focus on understanding why oil spills are so frequent in Southern California and how practices can be improved to minimize these incidents.
+
+
+

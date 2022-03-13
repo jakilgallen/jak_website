@@ -1,0 +1,184 @@
+---
+title: "Textual Analysis: The Meditations by Marcus Aurelius"
+description: |
+  A brief example of my textual analysis skills.
+author:
+  - name: 'Joseph Kilgallen '
+    url: {}
+date: 2022-03-13
+output:
+  distill::distill_article:
+    self_contained: false
+    theme: darkly
+    highlight: tango
+    code_folding: hide
+---
+
+# Overview {.tabset .tabset-pills}
+
+
+![Marcus Aurelius- Crook, John Anthony. "Marcus Aurelius". Encyclopedia Britannica, 10 Dec. 2021, https://www.britannica.com/biography/Marcus-Aurelius-Roman-emperor. Accessed 10 March 2022.](data/marcus.jpeg)
+
+This report presents textual visualizations and sentiment analysis of the famous 'Meditations" by the philosopher king of Rome Marcus Aurelius. The report is split into three sections. In the first section I clean the data, put it into tidy, and remove all material other then the 3 books so that their content can be analyzed. In the second section I present two visualizations of the most common words by book number. Finally, the third section presents a sentiment analysis to determine how the sentiment differs across books using the AFINN lexicon.
+
+### Data Citation
+*Aurelius, M. (2003). The Meditations: A New Translation. Random House.*
+
+```{r setup, include= TRUE, warning = FALSE, message= FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(tidytext)
+library(textdata)
+library(pdftools)
+library(ggwordcloud)
+
+## Reading in the data- Meditations by Marcus Aurelius
+meditations_text <- pdf_text(here::here('data', 'meditations.pdf'))
+```
+
+```{r}
+#converting into a data frame,  wrangling with the tidyverse, 
+med_lines <- data.frame(meditations_text) %>% ## convert to data frame
+  mutate(page = 1:n()) %>%
+  mutate(text_full = str_split(meditations_text, pattern = '\\n')) %>% 
+  unnest(text_full) %>% 
+  mutate(text_full = str_trim(text_full)) 
+
+
+# Break it up by chapter, and do some analyses. 
+# Adding a new column that contains the Book number (so we can use this as a grouping variable later on).
+# Using `str_detect()` to look for any cells in "text_full" column that contains the string "Book", and if it does, the new column will contain that book number:
+med_books <- med_lines %>% 
+  slice(-(1:1432)) %>% # cutting out all intro stuff to just analyze Marcus Aurelius's portion of the writing
+  mutate(book = ifelse(str_detect(text_full, "Book"), text_full, NA)) %>%  
+  fill(book, .direction = 'down') %>% ## fills the NAs in chapter with the values above
+  separate(col = book, into = c("bo", "no"), sep = " ") %>% # tells it to break apart the book column into two columns as specified and to separate by a space
+  mutate(book = as.numeric(as.roman(no))) 
+## Noticed note section at end still attached want to remove so can just analyze by book
+med_books_clean <- med_books %>% 
+  slice(-(3795:4393))
+# tail(med_books_clean)
+
+
+## Now removing stop words using `tidyr::anti_join()`, which will *omit* any words in `stop_words` from `hobbit_tokens`.
+med_words <- med_books_clean %>% 
+  unnest_tokens(word, text_full) %>% 
+  select(-meditations_text)
+
+med_words_clean <- med_words %>% 
+  anti_join(stop_words, by = 'word') # tells it to remove words from the hobbit_words data frame looking specifically in the word column and filtering out words that match with the stop_words
+
+## can do quick word count by book
+med_counts <- med_words_clean %>% 
+  count(book, word)
+```
+
+
+## 1. Vizualizations of Common Words from Books 1-3
+
+In this section I look at the top 5 words within each book and present a graph displaying these comparisons by book. I then create and present a wordcloud of the top 100 words used from all three of the books.
+
+```{r}
+## Looking at top 5 words
+top_5_words <- med_counts %>% 
+  drop_na() %>% 
+  group_by(book) %>% 
+  arrange(-n) %>% 
+  slice(1:5) %>%
+  ungroup()
+
+# Graph of most common 5 words from each chapter
+ggplot(data = top_5_words, aes(x = n, y = word, fill = book)) +
+  geom_col() +
+  scale_fill_viridis_c() +
+  facet_wrap(~book, scales = "free") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  labs(x = "Total Count", y = "5 Most Common Words", title = "5 Most Common Words utilized across Books 1-3",
+       subtitle = "The Meditations by Marcus Aurelius")
+
+
+```
+
+
+```{r}
+## also going to make a wordcloud
+top100 <- med_counts %>%
+  arrange(-n) %>%  ## tells it to arrange from highest to lowest of n
+  slice(1:100) # then tells it to just take the top 100 rows
+
+top100_cloud <- ggplot(data = top100, aes(label = word)) +
+  geom_text_wordcloud(aes(color = n, size = n), shape = "circle") +
+  scale_size_area(max_size = 6) +
+  scale_color_gradientn(colors = c("darkgreen","blue","purple")) +
+  theme_minimal() +
+  labs(title = "100 Most Common Words from all three Books")
+
+top100_cloud
+```
+
+**Takeaways Word Count and Cloud**
+
+- Across the three books there is a surprising amount of commonality at least in the top 5 words for each, with 'people', 'nature' and 'life' coming out as some of the most common words in at least 2 of the chapters.
+
+- This is reflected by the word cloud in which we see the most common words over all three books to be nature, people, mind, and life. These results make sense as the vast majority of the book discusses how people can live intentionally controlling their mind to live as nature intended.
+
+## 2. Sentiment analysis of 'The Meditations' using AFINN lexicon
+
+In this section I present a sentiment analysis of *The Meditations* comparing how sentiments differ across each of the three books using the AFINN lexicon. The AFINN lexicon assigns words with a score that runs between -5 and 5, with negative scores indicating negative sentiment and positive scores indicating positive sentiment.  
+
+```{r}
+## getting afinn 
+#get_sentiments(lexicon = "afinn")
+# Let's look at the pretty positive words:
+afinn_pos <- get_sentiments("afinn") %>% 
+  filter(value %in% c(3,4,5))
+##lets get negative tehehehe muahhahah
+afinn_neg <- get_sentiments("afinn") %>% 
+  filter(value %in% c(-4,-5))
+
+## Performing Sentiment Analysis
+med_afinn <- med_words_clean %>% 
+  inner_join(get_sentiments("afinn"), by = 'word')
+
+afinn_counts <- med_afinn %>% 
+  drop_na() %>% 
+  count(book, value)
+
+# Plot them: 
+ggplot(data = afinn_counts, aes(x = value, y = n, fill = book)) +
+  geom_col(colour = "black") +
+  facet_wrap(~book) +
+  scale_fill_viridis_c() +
+  labs(x = "AFINN Value (from -5 = most negative to 5 = most positive)", y = "Total Count", 
+       title = "Sentiment Values for Books 1-3", subtitle = "The Meditations by Marcus Aurelius") +
+  theme_minimal() +
+  theme(legend.position = "none")
+  
+
+# Find the mean afinn score by chapter: 
+afinn_means <- med_afinn %>% 
+  drop_na() %>%
+  group_by(book) %>% 
+  summarize(mean_afinn = mean(value))
+
+ggplot(data = afinn_means, 
+       aes(x = fct_rev(factor(book)),
+           y = mean_afinn, fill = book)) +
+           # y = fct_rev(as.factor(chapter)))) +
+  geom_col() +
+  coord_flip() +
+  scale_fill_viridis_c() +
+  labs(x = "Book Number", y = "Mean AFINN Value", 
+       title = "Mean AFINN Values for Books 1-3", subtitle = "From The Meditations by Marcus Aurelius") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+**Takeaways Sentiment Analysis**
+
+*Looking at the figures above presenting results of the AFINN sentiment analysis several trends can be noted:*
+
+- In general book 3 has far more words then the other 2 books both positive and negative. This is logically consistent as book 3 is by far the lengthiest of the three.
+
+- Book 1 has the most positive mean value, Book 2 has the least positive mean value, and book 3 falls right in the middle. But overall none of the books are strongly positive or negative but instead fall largely in the middle. This is fitting for the stoic as much of Aurelius's writing centers around the duality of existence i.e. the positive and negative. Thus there are many passages that contain a roughly equal amount of both 'positive' and 'negative' words. 
